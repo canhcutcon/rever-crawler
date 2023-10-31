@@ -85,6 +85,63 @@ const fetchDataFromApi = async (apiUrl, page, c) => {
   }
 };
 
+const fetchDataDetailFromApi = async ({ id, serviceType, source }) => {
+  try {
+    const params = {
+      id,
+      service_type: serviceType,
+      source,
+    };
+    const apiDetail = `https://rever.vn/api/property/fb-pixel?id=${id}&service_type=${serviceType}&source=${source}`;
+
+    const requestHeaders = {
+      Accept: "application/json, text/plain, */*",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Accept-Language": "en-US,en;q=0.9,vi;q=0.8",
+      "Content-Type": "application/json;charset=UTF-8",
+    };
+
+    const response = await axios.get(apiDetail, params, {
+      headers: requestHeaders,
+    });
+
+    if (response.status !== 200) {
+      return {
+        prop_id: "",
+        neighborhood: "",
+        city: "Hồ Chí Minh",
+        district: "",
+        price: 0,
+        availability: "for_sale",
+        property_type: "apartment",
+        contact_stage: "",
+        is_registered: false,
+        furniture: "basic",
+        lease_end_date: 1701277199999,
+        lease_end_date_formatted: "2023-11-29",
+      };
+    }
+    console.log("Response:", response.data.data);
+    return response.data.data || {};
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return {
+      prop_id: "",
+      neighborhood: "",
+      city: "Hồ Chí Minh",
+      district: "",
+      price: 0,
+      availability: "for_sale",
+      property_type: "apartment",
+      contact_stage: "",
+      is_registered: false,
+      furniture: "basic",
+      lease_end_date: 1701277199999,
+      lease_end_date_formatted: "2023-11-29",
+    };
+  }
+};
+
 const dataToJson = async () => {
   let i = 21;
   for (const key of Object.keys(checkSum)) {
@@ -102,12 +159,12 @@ const dataToJson = async () => {
   console.log("success");
 };
 
-const dataToCSV = (csvFileName) => {
+const dataToCSV = async (csvFileName) => {
   const data = [];
   for (let i = 1; i <= 24; i++) {
     const filePath = `fetch-data/data${i}.json`;
     const temp = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    temp.data.map((i) => {
+    for (const i of temp.data) {
       const {
         url,
         thumbnail,
@@ -119,7 +176,25 @@ const dataToCSV = (csvFileName) => {
         num_bath_room,
         area,
         price,
+        description,
+        has_media,
+        featured,
+        market_center,
+        id,
+        service_type,
+        source,
       } = i;
+      const {
+        property_type,
+        contact_stage,
+        furniture,
+        lease_end_date_formatted,
+      } = await fetchDataDetailFromApi({
+        id,
+        serviceType: service_type,
+        source,
+      });
+
       data.push({
         url,
         thumbnail,
@@ -131,13 +206,22 @@ const dataToCSV = (csvFileName) => {
         num_bath_room,
         area,
         price,
+        description,
+        has_media,
+        featured,
+        market_center,
+        paymentCurrency: "vnd",
+        property_type,
+        contact_stage,
+        furniture,
+        lease_end_date_formatted,
       });
-    });
+    }
   }
   exportDataToCsv(data, csvFileName);
 };
 const main = () => {
-  dataToJson();
+  // dataToJson();
   dataToCSV("data-can-ho.csv");
 };
 main();

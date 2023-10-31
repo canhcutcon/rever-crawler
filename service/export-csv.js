@@ -11,6 +11,15 @@ const headers = [
   { id: "num_bath_room", title: "Number of Bathrooms" },
   { id: "area", title: "Area" },
   { id: "price", title: "Price" },
+  { id: "description", title: "Description" },
+  { id: "has_media", title: "Has Media" },
+  { id: "featured", title: "Featured" },
+  { id: "market_center", title: "Market Center" },
+  { id: "paymentCurrency", title: "Payment Currency" },
+  { id: "property_type", title: "Property Type" },
+  { id: "contact_stage", title: "Contact Stage" },
+  { id: "furniture", title: "Furniture" },
+  { id: "lease_end_date_formatted", title: "Lease End Date" },
 ];
 const exportDataToCsv = async (data, csvFileName) => {
   try {
